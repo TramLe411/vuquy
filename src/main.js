@@ -15,9 +15,12 @@ const $ = (s) => document.querySelector(s);
 
 const mapUrl = w.mapUrl;
 const start = new Date(w.event.date);
-
-const calStart = '20261206T040000Z';
-const calEnd = '20261206T060000Z';
+const [eventYear, eventMonth, eventDay] = w.event.date.slice(0, 10).split('-').map(Number);
+const calendarFirstWeekday = (new Date(eventYear, eventMonth - 1, 1).getDay() + 6) % 7;
+const calendarDaysInMonth = new Date(eventYear, eventMonth, 0).getDate();
+const toCalendarDate = (date) => date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+const calStart = toCalendarDate(start);
+const calEnd = toCalendarDate(new Date(start.getTime() + 2 * 60 * 60 * 1000));
 
 const calendarUrl =
   `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`${w.event.type} ${w.bride.fullName} & ${w.groom.fullName}`)}&dates=${calStart}/${calEnd}&details=${encodeURIComponent(`Trân trọng kính mời. Địa điểm: ${w.event.venue}. ${w.event.address}`)}&location=${encodeURIComponent(w.event.address)}`;
@@ -49,7 +52,7 @@ root.innerHTML = `
     <div class="cover-rule"><i></i></div>
 
     <p class="cover-date">06 tháng 12, 2026</p>
-    <p class="cover-venue">Tư Gia Nữ</p>
+    <p class="cover-venue">Tư gia nhà gái</p>
 
     <button class="open-button" id="open">Mở thiệp</button>
   </div>
@@ -216,7 +219,7 @@ root.innerHTML = `
 
   <!-- CALENDAR nằm bên trong khung đỏ -->
   <div class="calendar-paper">
-    <h3>Tháng 12 / 2026</h3>
+    <h3>Tháng ${String(eventMonth).padStart(2, '0')} / ${eventYear}</h3>
 
     <div class="calendar-grid weekday">
       ${'T2 T3 T4 T5 T6 T7 CN'.split(' ')
@@ -224,14 +227,14 @@ root.innerHTML = `
     </div>
 
     <div class="calendar-grid days">
-      ${Array.from({ length: 35 }, (_, i) => {
-        const d = i - 2;
+      ${Array.from({ length: Math.ceil((calendarFirstWeekday + calendarDaysInMonth) / 7) * 7 }, (_, i) => {
+        const d = i - calendarFirstWeekday + 1;
 
-        if (d < 1 || d > 31) {
+        if (d < 1 || d > calendarDaysInMonth) {
           return `<span class="empty-day"></span>`;
         }
 
-        if (d === 6) {
+        if (d === eventDay) {
           return `
             <span class="wedding-day">
               <svg class="heart-marker"
@@ -249,7 +252,7 @@ root.innerHTML = `
                   fill="#651522"
                 />
               </svg>
-              <span class="day-number">6</span>
+              <span class="day-number">${eventDay}</span>
             </span>
           `;
         }
@@ -273,7 +276,7 @@ root.innerHTML = `
 
 <section class="location-section paper-section reveal">
   <p class="section-title location-title">
-    LỄ VU QUY TỔ CHỨC TẠI TƯ GIA NỮ
+    LỄ VU QUY TỔ CHỨC TẠI TƯ GIA NHÀ GÁI
   </p>
 
   <p class="location-address">${w.event.address}</p>
